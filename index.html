@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kebun Ceria 🌻</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="screen">
+        <div class="splash-content">
+            <h1>Kebun Ceria 🌻</h1>
+            <p>Welcome to your happy farm!</p>
+            <button id="btn-start" class="btn-large">Play Now</button>
+        </div>
+    </div>
+
+    <!-- Main Game UI -->
+    <div id="game-ui" class="hidden">
+        <!-- Top HUD -->
+        <header id="hud">
+            <div class="hud-item profile">
+                <span class="avatar">🧑‍🌾</span>
+                <div class="level-info">
+                    <span id="level-text">Lvl 1</span>
+                    <div class="xp-bar"><div id="xp-fill"></div></div>
+                </div>
+            </div>
+            <div class="hud-item coins">
+                <span>💰</span> <span id="coin-count">100</span>
+            </div>
+        </header>
+
+        <!-- Farm Area -->
+        <main id="farm-area">
+            <div id="farm-grid" class="farm-grid">
+                <!-- Plots injected by JS -->
+            </div>
+            
+            <!-- Characters (Unlocked as you level up) -->
+            <div id="characters-container">
+                <div id="char-bunny" class="character hidden">🐰</div>
+                <div id="char-kitty" class="character hidden">🐱</div>
+                <div id="char-puppy" class="character hidden">🐶</div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-btn" data-target="shop-modal">🛒<span>Shop</span></button>
+            <button class="nav-btn" data-target="inventory-modal">🎒<span>Seeds</span></button>
+            <button class="nav-btn" data-target="quests-modal">📜<span>Quests</span></button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <div id="shop-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="btn-close">✖</button>
+            <h2>Seed Shop 🛒</h2>
+            <div id="shop-items" class="scroll-list"></div>
+            <h3>Farm Upgrades 🏡</h3>
+            <div id="upgrade-items" class="scroll-list"></div>
+        </div>
+    </div>
+
+    <div id="inventory-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="btn-close">✖</button>
+            <h2>Your Seeds 🎒</h2>
+            <p id="inventory-hint">Select a seed to plant!</p>
+            <div id="inventory-items" class="scroll-list"></div>
+        </div>
+    </div>
+
+    <div id="quests-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="btn-close">✖</button>
+            <h2>Quests 📜</h2>
+            <div id="quests-list" class="scroll-list"></div>
+        </div>
+    </div>
+
+    <div id="daily-reward-modal" class="modal hidden">
+        <div class="modal-content bounce-in">
+            <h2>Daily Reward! 🎁</h2>
+            <p>Welcome back! Here is your daily gift.</p>
+            <div class="reward-box">💰 +50 Coins</div>
+            <button id="btn-claim-daily" class="btn-large">Claim</button>
+        </div>
+    </div>
+
+    <div id="level-up-modal" class="modal hidden">
+        <div class="modal-content bounce-in">
+            <h2>Level Up! 🎉</h2>
+            <p>You reached level <span id="new-level-text"></span>!</p>
+            <p id="level-unlock-text"></p>
+            <button id="btn-level-ok" class="btn-large">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- Particles Container -->
+    <div id="particles"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/plants.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/farm.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/quests.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

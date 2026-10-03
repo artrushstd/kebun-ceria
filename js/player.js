@@ -1,0 +1,78 @@
+// Player State Management
+const Player = {
+    data: {
+        coins: 100,
+        xp: 0,
+        level: 1,
+        inventory: { carrot: 3, corn: 1, tomato: 0 },
+        unlockedChars: [],
+        maxPlots: 6
+    },
+
+    load() {
+        this.data = Storage.load('playerData', this.data);
+        this.updateHUD();
+        this.checkCharacterUnlocks();
+    },
+
+    save() {
+        Storage.save('playerData', this.data);
+    },
+
+    addCoins(amount) {
+        this.data.coins += amount;
+        this.save();
+        this.updateHUD();
+        Quests.checkProgress('earn', amount);
+    },
+
+    addXP(amount) {
+        this.data.xp += amount;
+        const requiredXP = this.data.level * 100;
+        
+        if (this.data.xp >= requiredXP) {
+            this.data.xp -= requiredXP;
+            this.data.level++;
+            this.handleLevelUp();
+        }
+        this.save();
+        this.updateHUD();
+    },
+
+    handleLevelUp() {
+        AudioSys.playLevelUp();
+        document.getElementById('new-level-text').textContent = this.data.level;
+        let unlockText = "Great job, farmer!";
+        
+        if (this.data.level === 2 && !this.data.unlockedChars.includes('bunny')) {
+            this.data.unlockedChars.push('bunny');
+            unlockText = "You unlocked the Bunny! 🐰";
+        } else if (this.data.level === 3 && !this.data.unlockedChars.includes('kitty')) {
+            this.data.unlockedChars.push('kitty');
+            unlockText = "You unlocked the Kitty! 🐱";
+        } else if (this.data.level === 4 && !this.data.unlockedChars.includes('puppy')) {
+            this.data.unlockedChars.push('puppy');
+            unlockText = "You unlocked the Puppy! 🐶";
+        }
+        
+        document.getElementById('level-unlock-text').textContent = unlockText;
+        Game.openModal('level-up-modal');
+        this.checkCharacterUnlocks();
+    },
+
+    checkCharacterUnlocks() {
+        this.data.unlockedChars.forEach(char => {
+            const el = document.getElementById(`char-${char}`);
+            if(el) el.classList.remove('hidden');
+        });
+    },
+
+    updateHUD() {
+        document.getElementById('coin-count').textContent = this.data.coins;
+        document.getElementById('level-text').textContent = 'Lvl ' + this.data.level;
+        
+        const requiredXP = this.data.level * 100;
+        const xpPercent = (this.data.xp / requiredXP) * 100;
+        document.getElementById('xp-fill').style.width = `${xpPercent}%`;
+    }
+};

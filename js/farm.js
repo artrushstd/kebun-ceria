@@ -1,0 +1,146 @@
+// Farm & Plot Management
+const Farm = {
+    plots: [],
+    selectedPlotId: null,
+
+    load() {
+        const defaultPlots = Array.from({length: 6}, (_, i) => ({ id: i, state: 'empty', cropId: null, plantedAt: null }));
+        this.plots = Storage.load('farmPlots', defaultPlots);
+        
+        // Handle max plots upgrade from previous save
+        while(this.plots.length < Player.data.maxPlots) {
+            this.plots.push({ id: this.plots.length, state: 'empty', cropId: null, plantedAt: null });
+        }
+        
+        this.render();
+        setInterval(() => this.tick(), 500);
+    },
+
+    save() {
+        Storage.save('farmPlots', this.plots);
+    },
+
+    render() {
+        const grid = document.getElementById('farm-grid');
+        grid.innerHTML = '';
+        this.plots.forEach(plot => {
+            const div = document.createElement('div');
+            div.className = `plot ${plot.state}`;
+            div.dataset.id = plot.id;
+            div.onclick = () => this.handlePlotClick(plot.id);
+            
+            if (plot.state === 'growing') {
+                div.innerHTML = `🌱<div class="progress-bar"><div class="progress-fill" id="prog-${plot.id}"></div></div>`;
+            } else if (plot.state === 'ready') {
+                div.innerHTML = PLANTS[plot.cropId].emoji;
+            }
+            grid.appendChild(div);
+        });
+    },
+
+    handlePlotClick(id) {
+        const plot = this.plots[id];
+        if (plot.state === 'empty') {
+            AudioSys.playClick();
+            this.selectedPlotId = id;
+            Game.openInventoryForPlanting();
+        } else if (plot.state === 'ready') {
+            this.harvest(id);
+        } else {
+            AudioSys.playClick(); // Just boop if growing
+        }
+    },
+
+    plant(cropId) {
+        if (this.selectedPlotId === null) return;
+        const plot = this.plots[this.selectedPlotId];
+        
+        plot.state = 'growing';
+        plot.cropId = cropId;
+        plot.plantedAt = Date.now();
+        
+        Player.data.inventory[cropId]--;
+        Player.save();
+        this.save();
+        this.render();
+        
+        AudioSys.playPlant();
+        Quests.checkProgress('plant', 1, cropId);
+        
+        this.selectedPlotId = null;
+        Game.closeModal('inventory-modal');
+    },
+
+    harvest(id) {
+        const plot = this.plots[id];
+        const plant = PLANTS[plot.cropId];
+        
+        // Rewards
+        Player.addCoins(plant.reward);
+        Player.addXP(plant.xp);
+        Quests.checkProgress('harvest', 1, plot.cropId);
+        
+        // Effects
+        AudioSys.playHarvest();
+        setTimeout(() => AudioSys.playCoin(), 300);
+        this.spawnParticles(id, `+${plant.reward}💰`);
+
+        // Reset plot
+        plot.state = 'empty';
+        plot.cropId = null;
+        plot.plantedAt = null;
+        
+        this.save();
+        this.render();
+    },
+
+    tick() {
+        let changed = false;
+        const now = Date.now();
+        
+        this.plots.forEach(plot => {
+            if (plot.state === 'growing') {
+                const plant = PLANTS[plot.cropId];
+                const elapsed = now - plot.plantedAt;
+                const progress = Math.min((elapsed / plant.growTime) * 100, 100);
+                
+                const fill = document.getElementById(`prog-${plot.id}`);
+                if (fill) fill.style.width = `${progress}%`;
+                
+                if (elapsed >= plant.growTime) {
+                    plot.state = 'ready';
+                    changed = true;
+                }
+            }
+        });
+        
+        if (changed) {
+            this.save();
+            this.render();
+        }
+    },
+
+    spawnParticles(plotId, text) {
+        const plotEl = document.querySelector(`.plot[data-id='${plotId}']`);
+        if(!plotEl) return;
+        const rect = plotEl.getBoundingClientRect();
+        
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = text;
+        particle.style.left = `${rect.left + rect.width/2 - 20}px`;
+        particle.style.top = `${rect.top}px`;
+        
+        document.getElementById('particles').appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+    },
+
+    upgradePlots(newMax) {
+        Player.data.maxPlots = newMax;
+        while(this.plots.length < newMax) {
+            this.plots.push({ id: this.plots.length, state: 'empty', cropId: null, plantedAt: null });
+        }
+        this.save();
+        this.render();
+    }
+};

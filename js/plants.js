@@ -1,0 +1,6 @@
+// Plant Definitions
+const PLANTS = {
+    carrot: { id: 'carrot', name: 'Carrot', emoji: '🥕', growTime: 5000, seedCost: 10, reward: 20, xp: 10 },
+    corn: { id: 'corn', name: 'Corn', emoji: '🌽', growTime: 10000, seedCost: 20, reward: 45, xp: 20 },
+    tomato: { id: 'tomato', name: 'Tomato', emoji: '🍅', growTime: 15000, seedCost: 35, reward: 80, xp: 35 }
+};
